@@ -7,156 +7,238 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import ru.dns.data.Product;
 
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Класс описывающий страницу корзины
+ * @author Алехнович Александр
+ */
 public class BasketPage extends BasePage {
 
-    @FindBy(xpath = "//div[contains(@class,'additional-warranties-row__radio')]")
-    List<WebElement> listProductGuaranteeCheckbox;
-
+    /**
+     * @author Алехнович Александр
+     * Элемент "Корзина" на странице корзины
+     */
     @FindBy(xpath = "//span[contains(@class,'cart-link__price')]")
     WebElement sumProductBasKet;
 
+    /**
+     * @author Алехнович Александр
+     * Лист карточек продукта на странице корзины
+     */
     @FindBy(xpath = "//div[@class='cart-items__content-container']")
     List<WebElement> listProductsBasket;
 
+    /**
+     * @author Алехнович Александр
+     * Кнопка "Вернуть удалённый товар" на странице корзины
+     */
     @FindBy(xpath = "//div[@class='cart-tab-total-amount']//span[@class='restore-last-removed']")
     WebElement buttonReturnDeletedItem;
 
+    /**
+     * @author Алехнович Александр
+     * Кнопка "Перейти к оформлению" на странице корзины
+     */
     @FindBy(xpath = "//button[contains(@id,'buy-btn-main')]")
     WebElement goToCheckout;
 
+    /**
+     * @author Алехнович Александр
+     * Для проверки чекбокса с гарантией у товара на странице корзины
+     */
+    By productGuaranteeCheckbox = By.xpath(".//div[contains(@class,'additional-warranties-row__radio')]");
+
+    /**
+     * @author Алехнович Александр
+     * Поиск названия товара в карточке товара на странице корзины
+     */
+    By nameProductInBasket = By.xpath(".//a[contains(@class,'base-ui-link')]");
+
+    /**
+     * @author Алехнович Александр
+     * Поиск кнопки "+" в карточке товара на странице корзины
+     */
     private By plusProduct = By.xpath(".//button[contains(@class,'count-buttons__button_plus')]");
 
-    private List<Product> listProducts = new ArrayList<>();
+    /**
+     * @author Алехнович Александр
+     * Поиск цены у товара
+     */
+    private By priceProduct = By.xpath(".//span[contains(@class,'price__current')]");
 
-    private List<Product> listProductsSave = new ArrayList<>();
+    /**
+     * @author Алехнович Александр
+     * Поиск цены у корзины
+     */
+    By sumBasket = By.xpath("//span[contains(@class,'cart-link__price')]");
 
-    private int resultPriceProductBasket;
+    /**
+     * @author Алехнович Александр
+     * Поиск кнопки "Удалить" у товара
+     */
+    private By deleteProduct = By.xpath(".//button[contains(@class, 'remove-button')]");
 
-    private int priceProductDelete;
-
-    public BasketPage checkProductGuaranteeCheckbox(String warrantyInBasket) {
-        for (int i = 0; i < listProductGuaranteeCheckbox.size(); i++) {
-            if (listProductGuaranteeCheckbox.get(i).getText().replaceAll(" ","")
-                    .contains(warrantyInBasket.replaceAll(" ",""))) {
-                Assertions.assertTrue(listProductGuaranteeCheckbox.get(i).getAttribute("class").contains("checked"));
-                break;
+    /**
+     * Проверка чекбокса гарантии на странице корзины
+     * @author Алехнович Александр
+     * @param nameProduct      - название товара для проверки у него чекбокс
+     * @param warrantyInBasket - значение гарантии для проверки
+     * @return BasketPage - т.е. остаемся на этой странице
+     */
+    public BasketPage checkProductGuaranteeCheckbox(String nameProduct, String warrantyInBasket) {
+        for (int i = 0; i < listProductsBasket.size(); i++) {
+            if (listProductsBasket.get(i).findElement(nameProductInBasket).getText().equalsIgnoreCase(nameProduct)) {
+                WebElement checkBox = listProductsBasket.get(i).findElements(productGuaranteeCheckbox).stream()
+                        .filter(x -> x.getText().equalsIgnoreCase(warrantyInBasket)).findFirst().get();
+                Assertions.assertTrue(checkBox.getAttribute("class").contains("checked"),
+                        "Чекбокс: " + warrantyInBasket + " в корзине у продукта: " + nameProduct + " не выбран");
+                return this;
+            } else {
+                Assertions.fail("Товар в корзине: " + nameProduct + "не найден");
             }
         }
+        Assertions.fail("Чекбокс с гарантией: " + warrantyInBasket + " в корзине у продукта: " + nameProduct + "не найден");
         return this;
     }
 
+    /**
+     * Метод сохраняет цену корзины на странице корзины
+     * @author Алехнович Александр
+     * @return int - цена в корзине
+     */
     public int getResultPriceProductBasket() {
         return Integer.parseInt(sumProductBasKet.getText().replaceAll("\\D", ""));
     }
 
+    /**
+     * Метод проверяет цену каждого из товаров
+     * @author Алехнович Александр
+     * @return BasketPage - т.е. остаемся на этой странице
+     */
     public BasketPage checkProductPrice() {
         for (int i = 0; i < listProductsBasket.size(); i++) {
-            String text = listProductsBasket.get(i).findElement(By.xpath(".//a[contains(@class,'base-ui-link')]")).getText();
-            if (pageManager.getBasePage().getListProducts().stream().anyMatch(x -> x.getName().equalsIgnoreCase(text))) {
-                int priceProduct = pageManager.getBasePage().getListProducts().stream().filter(x->x.getName().equalsIgnoreCase(text))
+            String text = listProductsBasket.get(i).findElement(nameProductInBasket).getText();
+            if (pageManager.getBasePage().getListProducts().stream().anyMatch(x -> x.getName().contains(text))) {
+                int priceProductResult = pageManager.getBasePage().getListProducts().stream().filter(x -> x.getName().contains(text))
                         .findFirst().get().getPrice();
-                int priceWarranty = pageManager.getBasePage().getListProducts().stream().filter(x->x.getName().equalsIgnoreCase(text))
+                int priceWarrantyResult = pageManager.getBasePage().getListProducts().stream().filter(x -> x.getName().contains(text))
                         .findFirst().get().getPriceWithWarranty();
-                Assertions.assertEquals(priceProduct - priceWarranty, Integer.parseInt(listProductsBasket.get(i)
-                        .findElement(By.xpath(".//span[contains(@class,'price__current')]")).getText().replaceAll("\\D", "")));
+                Assertions.assertEquals(priceProductResult - priceWarrantyResult, Integer.parseInt(listProductsBasket.get(i)
+                                .findElement(priceProduct).getText().replaceAll("\\D", "")),
+                        "Цена товара в корзине: " + text + "не совпадает");
             }
         }
         return this;
     }
 
+    /**
+     * Проверка на равенство суммы корзины и суммы покупок
+     *
+     * @return BasketPage - т.е. остаемся на этой странице
+     * @author Алехнович Александр
+     */
     public BasketPage checkSumBasket() {
         int sumPriceProduct = pageManager.getBasePage().getListProducts().stream().mapToInt(Product::getPrice).sum();
-        Assertions.assertEquals(sumPriceProduct, Integer.parseInt(sumProductBasKet.getText().replaceAll("\\D", "")));
+        Assertions.assertEquals(sumPriceProduct, getResultPriceProductBasket(), "Сумма покупок не равна сумме корзины");
         return this;
     }
 
-    public List<Product> getListProductsBasket() {
-        Product product = new Product();
+    /**
+     * Метод удаляет товар из корзины
+     * @author Алехнович Александр
+     * @param productName - название товара для удаления
+     * @return BasketPage - т.е. остаемся на этой странице
+     */
+    public BasketPage deleteProductFromBasket(String productName) {
         for (int i = 0; i < listProductsBasket.size(); i++) {
-            String text = listProductsBasket.get(i).findElement(By.xpath(".//a[contains(@class,'base-ui-link')]")).getText();
-            if (pageManager.getBasePage().getListProducts().stream().anyMatch(x -> x.getName().equalsIgnoreCase(text))) {
-                waitUtilElementToBeVisible(listProductsBasket.get(i).findElement(By.xpath(".//span[contains(@class,'price__current')]")));
-                product.setName(listProductsBasket.get(i).findElement(By.xpath(".//a[contains(@class,'base-ui-link')]")).getText());
-                product.setPrice(Integer.parseInt(listProductsBasket.get(i).findElement(By.xpath(".//span[contains(@class,'price__current')]"))
-                        .getText().replaceAll("\\D", "")));
-                listProducts.add(product);
-            }
-        }
-        return listProducts;
-    }
-
-    public BasketPage deleteProductFromBasket(String product) {
-        for (int i = 0; i < listProductsBasket.size(); i++) {
-            if (listProductsBasket.get(i).getText().contains(product)) {
-                listProductsBasket.get(i).findElement(By.xpath(".//button[contains(@class, 'remove-button')]")).click();
-//                Assertions.assertTrue( listProductsBasket.get(i).findElement(By.xpath(".//button[contains(@class, 'remove-button')]")).getAttribute("class")
-//                .contains("disabled"));
+            if (listProductsBasket.get(i).getText().contains(productName)) {
+                listProductsBasket.get(i).findElement(deleteProduct).click();
                 waitUtilElementToBeClickable(goToCheckout);
-                break;
+                return this;
             }
         }
+        Assertions.fail("Товар: " + productName + "не удален из корзины");
         return this;
     }
 
+    /**
+     * Проверка, что продукт удален
+     * @author Алехнович Александр
+     * @param productName - название удаленного из корзины товара
+     * @return BasketPage - т.е. остаемся на этой странице
+     */
     public BasketPage checkDeleteProduct(String productName) {
-        Assertions.assertFalse(listProductsBasket.stream().anyMatch(x -> x.findElement(By.xpath(".//a[contains(@class,'base-ui-link')]"))
-                .getText().equalsIgnoreCase(productName)));
+        Assertions.assertFalse(listProductsBasket.stream().anyMatch(x -> x.findElement(nameProductInBasket)
+                .getText().equalsIgnoreCase(productName)), "Товар: " + productName + " не удален из корзины");
         Product productResult = pageManager.getBasePage().getListProducts().stream().filter(x -> x.getName().equalsIgnoreCase(productName)).findFirst().get();
         pageManager.getBasePage().deleteProduct(productResult);
         return this;
     }
 
-    public BasketPage checkSumProductsSum() {
-        int sumPriceProductsBefore = pageManager.getBasePage().getListProducts().stream().mapToInt(Product::getPrice).sum();
-        int result = getResultPriceProductBasket();
-        System.out.println(sumPriceProductsBefore);
-        System.out.println(result);
-        Assertions.assertEquals(sumPriceProductsBefore, result);
-        return this;
-    }
-
-    public BasketPage plusProductInBasket(String product, int countPlus) {
+    /**
+     * Метод увеличивает количество товара, путем нажатия на кнопку "+" в карточке товара
+     * @author Алехнович Александр
+     * @param nameProduct - название товара у которого нужно нажать на кнопку "+"
+     * @param countPlus   - количество нажатий на кнопку "+"
+     * @return BasketPage - т.е. остаемся на этой странице
+     */
+    public BasketPage plusProductInBasket(String nameProduct, int countPlus) {
         int count = 0;
         while (count < countPlus) {
             String text = sumProductBasKet.getText();
             for (WebElement webElement : listProductsBasket) {
-                if (webElement.findElement(By.xpath(".//a[contains(@class,'base-ui-link')]")).getText().contains(product)) {
+                if (webElement.findElement(nameProductInBasket).getText().contains(nameProduct)) {
                     waitUtilElementToBeClickable(webElement.findElement(plusProduct));
                     scrollToElementActions(webElement.findElement(plusProduct));
                     elementClickJs(webElement.findElement(plusProduct));
                     waitUtilElementToBeVisible(webElement.findElement(plusProduct));
                     waitUtilElementToBeClickable(goToCheckout);
-                    wait.until(ExpectedConditions.invisibilityOfElementWithText(By.xpath("//span[contains(@class,'cart-link__price')]"), text));
-                    //Тут должен быть Assert
-                    Product productResult = pageManager.getBasePage().getListProducts().stream().filter(x -> x.getName().equalsIgnoreCase(product)).findFirst().get();
+                    wait.until(ExpectedConditions.invisibilityOfElementWithText(sumBasket, text));
+                    Product productResult = pageManager.getBasePage().getListProducts().stream()
+                            .filter(x -> x.getName().equalsIgnoreCase(nameProduct)).findFirst().get();
                     pageManager.getBasePage().saveListProducts(productResult);
+                    int sumPriceProduct = pageManager.getBasePage().getListProducts().stream().mapToInt(Product::getPrice).sum();
+                    Assertions.assertEquals(sumPriceProduct, getResultPriceProductBasket(),
+                            "Количество товара в корзине: " + nameProduct + " не увеличилось");
                     count++;
+                } else {
+                    Assertions.fail("Товар в корзине: " + nameProduct + " не найден");
                 }
             }
         }
         return this;
     }
 
-    public BasketPage returnADeletedItem() {
+    /**
+     * Метод возвращает удаленный товар
+     * @author Алехнович Александр
+     * @return BasketPage - т.е. остаемся на этой странице
+     */
+    public BasketPage returnDeletedItem() {
         waitUtilElementToBeClickable(buttonReturnDeletedItem).click();
         waitUtilElementToBeClickable(goToCheckout);
         return this;
     }
 
+    /**
+     * Проверка, что продукт появился
+     * @author Алехнович Александр
+     * @param productName - название возвращенного, после удаления из корзины, товара
+     * @param warranty    - значение гарантии на товар возвращенного, после удаления из корзины, товара
+     * @return BasketPage - т.е. остаемся на этой странице
+     */
     public BasketPage checkAddProduct(String productName, String warranty) {
-        Assertions.assertTrue(listProductsBasket.stream().anyMatch(x -> x.findElement(By.xpath(".//a[contains(@class,'base-ui-link')]"))
-                .getText().contains(productName)));;
-        if (listProductsBasket.stream().anyMatch(x -> x.findElement(By.xpath(".//a[contains(@class,'base-ui-link')]")).getText()
-                .replaceAll(" ","").contains(productName.replaceAll(" ","")))) {
+        Assertions.assertTrue(listProductsBasket.stream().anyMatch(x -> x.findElement(nameProductInBasket)
+                .getText().contains(productName)), "Товар: " + productName + "не возвращен в корзину");
+        if (listProductsBasket.stream().anyMatch(x -> x.findElement(nameProductInBasket).getText()
+                .replaceAll(" ", "").contains(productName.replaceAll(" ", "")))) {
             Product product = new Product();
             product.setName(productName);
             product.setWarranty(warranty);
-            product.setPrice(Integer.parseInt(listProductsBasket.stream().filter(x -> x.findElement(By.xpath(".//a[contains(@class,'base-ui-link')]"))
-                            .getText().contains(productName)).findFirst().get().findElement(By.xpath(".//span[contains(@class,'price__current')]"))
-                            .getText().replaceAll("\\D", "")));
+            product.setPrice(Integer.parseInt(listProductsBasket.stream().filter(x -> x.findElement(nameProductInBasket)
+                            .getText().contains(productName)).findFirst().get().findElement(priceProduct)
+                    .getText().replaceAll("\\D", "")));
             pageManager.getBasePage().saveListProducts(product);
         }
         return this;

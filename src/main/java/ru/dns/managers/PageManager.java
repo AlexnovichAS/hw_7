@@ -5,31 +5,49 @@ import ru.dns.pages.*;
 
 /**
  * Класс для управления страничками
+ * @author Алехнович Александр
  */
 public class PageManager {
 
     /**
      * Менеджер страничек
+     * @author Алехнович Александр
      */
     private static PageManager pageManager;
 
-
+    /**
+     * Страница с результатами поиска
+     * @author Алехнович Александр
+     */
     private SearсhResultsPage afterSearсhPage;
 
-
+    /**
+     * Стартовая страничка
+     * @author Алехнович Александр
+     */
     private StartSearchPage startSearchPage;
 
-
+    /**
+     * Страница карточки товара
+     * @author Алехнович Александр
+     */
     private CardProductPage cardProductPage;
 
-
+    /**
+     * Страница корзины
+     * @author Алехнович Александр
+     */
     private BasketPage basketPage;
 
+    /**
+     * Базовый класс всех страничек
+     * @author Алехнович Александр
+     */
     private BasePage basePage;
 
     /**
      * Конструктор специально был объявлен как private (singleton паттерн)
-     *
+     * @author Алехнович Александр
      * @see PageManager#getPageManager()
      */
     private PageManager() {
@@ -37,7 +55,7 @@ public class PageManager {
 
     /**
      * Ленивая инициализация PageManager
-     *
+     * @author Алехнович Александр
      * @return PageManager
      */
     public static PageManager getPageManager() {
@@ -49,7 +67,7 @@ public class PageManager {
 
     /**
      * Ленивая инициализация {@link SearсhResultsPage}
-     *
+     * @author Алехнович Александр
      * @return SearсhResultsPage
      */
     public SearсhResultsPage getSearсhResultsPage() {
@@ -61,7 +79,7 @@ public class PageManager {
 
     /**
      * Ленивая инициализация {@link StartSearchPage}
-     *
+     * @author Алехнович Александр
      * @return StartSearchPage
      */
     public StartSearchPage getStartSearchPage() {
@@ -73,7 +91,7 @@ public class PageManager {
 
     /**
      * Ленивая инициализация {@link CardProductPage}
-     *
+     * @author Алехнович Александр
      * @return CardProductPage
      */
     public CardProductPage getCardProductPage() {
@@ -85,7 +103,7 @@ public class PageManager {
 
     /**
      * Ленивая инициализация {@link BasketPage}
-     *
+     * @author Алехнович Александр
      * @return BasketPage
      */
     public BasketPage getBasketPage() {
@@ -97,7 +115,7 @@ public class PageManager {
 
     /**
      * Ленивая инициализация {@link BasketPage}
-     *
+     * @author Алехнович Александр
      * @return BasketPage
      */
     public BasePage getBasePage() {
@@ -105,5 +123,13 @@ public class PageManager {
             basePage = new BasePage();
         }
         return basePage;
+    }
+
+    /**
+     * Присвоение null объекту {@link BasePage}
+     * @author Алехнович Александр
+     */
+    public void getCloseBasePage() {
+        basePage = null;
     }
 }

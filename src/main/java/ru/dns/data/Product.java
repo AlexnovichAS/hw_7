@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Класс товара
+ * @author Алехнович Александр
  */
 @Data
 @NoArgsConstructor

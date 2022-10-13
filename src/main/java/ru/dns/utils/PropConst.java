@@ -1,7 +1,8 @@
 package ru.dns.utils;
 
 /**
- * Класс констант для удобного доступа к значения в файле application.properties
+ * Класс констант для удобного доступа к значениям в файле application.properties
+ * @author Алехнович Александр
  */
 public class PropConst {
 

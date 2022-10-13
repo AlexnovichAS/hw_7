@@ -10,12 +10,13 @@ import static ru.dns.utils.PropConst.*;
 
 /**
  * Класс для управления веб драйвером
+ * @author Алехнович Александр
  */
 public class DriverManager {
 
     /**
      * Переменна для хранения объекта веб-драйвера
-     *
+     * @author Алехнович Александр
      * @see WebDriver
      */
     private WebDriver driver;
@@ -23,13 +24,14 @@ public class DriverManager {
 
     /**
      * Переменна для хранения объекта DriverManager
+     * @author Алехнович Александр
      */
     private static DriverManager INSTANCE = null;
 
 
     /**
      * Менеджер properties
-     *
+     * @author Алехнович Александр
      * @see TestPropManager#getTestPropManager()
      */
     private final TestPropManager props = TestPropManager.getTestPropManager();
@@ -37,7 +39,7 @@ public class DriverManager {
 
     /**
      * Конструктор специально был объявлен как private (singleton паттерн)
-     *
+     * @author Алехнович Александр
      * @see DriverManager#getDriverManager()
      */
     private DriverManager() {
@@ -45,7 +47,7 @@ public class DriverManager {
 
     /**
      * Метод ленивой инициализации DriverManager
-     *
+     * @author Алехнович Александр
      * @return DriverManager - возвращает DriverManager
      */
     public static DriverManager getDriverManager() {
@@ -57,7 +59,7 @@ public class DriverManager {
 
     /**
      * Метод ленивой инициализации веб драйвера
-     *
+     * @author Алехнович Александр
      * @return WebDriver - возвращает веб драйвер
      */
     public WebDriver getDriver() {
@@ -70,7 +72,7 @@ public class DriverManager {
 
     /**
      * Метод для закрытия сессии драйвера и браузера
-     *
+     * @author Алехнович Александр
      * @see WebDriver#quit()
      */
     public void quitDriver() {
@@ -83,6 +85,7 @@ public class DriverManager {
 
     /**
      * Метод инициализирующий веб драйвер
+     * @author Алехнович Александр
      */
     private void initDriver() {
         if (OS.isFamilyWindows()) {
@@ -96,6 +99,7 @@ public class DriverManager {
 
     /**
      * Метод инициализирующий веб драйвер под ОС семейства Windows
+     * @author Алехнович Александр
      */
     private void initDriverWindowsOsFamily() {
         initDriverAnyOsFamily(PATH_GECKO_DRIVER_WINDOWS, PATH_CHROME_DRIVER_WINDOWS);
@@ -104,6 +108,7 @@ public class DriverManager {
 
     /**
      * Метод инициализирующий веб драйвер под ОС семейства Mac
+     * @author Алехнович Александр
      */
     private void initDriverMacOsFamily() {
         initDriverAnyOsFamily(PATH_GECKO_DRIVER_MAC, PATH_CHROME_DRIVER_MAC);
@@ -111,6 +116,7 @@ public class DriverManager {
 
     /**
      * Метод инициализирующий веб драйвер под ОС семейства Unix
+     * @author Алехнович Александр
      */
     private void initDriverUnixOsFamily() {
         initDriverAnyOsFamily(PATH_GECKO_DRIVER_UNIX, PATH_CHROME_DRIVER_UNIX);
@@ -119,7 +125,7 @@ public class DriverManager {
 
     /**
      * Метод инициализирующий веб драйвер под любую ОС
-     *
+     * @author Алехнович Александр
      * @param gecko - переменная firefox из файла application.properties в классе {@link ru.dns.utils.PropConst}
      * @param chrome - переменная chrome из файла application.properties в классе {@link ru.dns.utils.PropConst}
      */
