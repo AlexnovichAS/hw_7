@@ -19,18 +19,29 @@ import static ru.dns.utils.PropConst.IMPLICITLY_WAIT;
 
 /**
  * Базовый класс всех страничек
+ *
  * @author Алехнович Александр
  */
 public class BasePage {
 
     /**
-     * Лист с товарами добавленными в корзину
+     * Лист с товарами без опций
+     *
      * @author Алехнович Александр
      */
-    private final List<Product> listProductsAndPrice = new ArrayList<>();
+    private final List<Product> listOriginalProducts = new ArrayList<>();
+
+
+    /**
+     * Лист с товарами добавленными в корзину
+     *
+     * @author Алехнович Александр
+     */
+    private final List<Product> listProductsInBasket = new ArrayList<>();
 
     /**
      * Менеджер WebDriver
+     *
      * @author Алехнович Александр
      * @see DriverManager#getDriverManager()
      */
@@ -38,6 +49,7 @@ public class BasePage {
 
     /**
      * Менеджер страничек
+     *
      * @author Алехнович Александр
      * @see PageManager
      */
@@ -46,6 +58,7 @@ public class BasePage {
 
     /**
      * Объект для имитации реального поведения мыши или клавиатуры
+     *
      * @author Алехнович Александр
      * @see Actions
      */
@@ -54,6 +67,7 @@ public class BasePage {
 
     /**
      * Объект для выполнения любого js кода
+     *
      * @author Алехнович Александр
      * @see JavascriptExecutor
      */
@@ -63,6 +77,7 @@ public class BasePage {
     /**
      * Объект явного ожидания
      * При применении будет ожидать заданного состояния 10 секунд с интервалом в 1 секунду
+     *
      * @author Алехнович Александр
      * @see WebDriverWait
      */
@@ -71,6 +86,7 @@ public class BasePage {
 
     /**
      * Менеджер properties
+     *
      * @author Алехнович Александр
      * @see TestPropManager#getTestPropManager()
      */
@@ -80,6 +96,7 @@ public class BasePage {
     /**
      * Конструктор позволяющий инициализировать все странички и их элементы помеченные аннотацией {@link FindBy}
      * Подробнее можно просмотреть в класс {@link PageFactory}
+     *
      * @author Алехнович Александр
      * @see FindBy
      * @see PageFactory
@@ -92,8 +109,9 @@ public class BasePage {
 
     /**
      * Функция позволяющая производить scroll до любого элемента с помощью js
-     * @author Алехнович Александр
+     *
      * @param element - веб-элемент странички
+     * @author Алехнович Александр
      * @see JavascriptExecutor
      */
     protected WebElement scrollToElementJs(WebElement element) {
@@ -103,8 +121,9 @@ public class BasePage {
 
     /**
      * Клик по элементу на js коде
-     * @author Алехнович Александр
+     *
      * @param element - веб элемент на который нужно кликнуть
+     * @author Алехнович Александр
      */
     public void elementClickJs(WebElement element) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) driverManager.getDriver();
@@ -114,10 +133,11 @@ public class BasePage {
     /**
      * Функция позволяющая производить scroll до любого элемента с помощью js со смещение
      * Смещение задается количеством пикселей по вертикали и горизонтали, т.е. смещение до точки (x, y)
-     * @author Алехнович Александр
+     *
      * @param element - веб-элемент странички
      * @param x       - параметр координаты по горизонтали
      * @param y       - параметр координаты по вертикали
+     * @author Алехнович Александр
      * @see JavascriptExecutor
      */
     public WebElement scrollWithOffset(WebElement element, int x, int y) {
@@ -130,9 +150,10 @@ public class BasePage {
 
     /**
      * Явное ожидание состояния clickable элемента
-     * @author Алехнович Александр
+     *
      * @param element - веб-элемент который требует проверки clickable
      * @return WebElement - возвращаем тот же веб элемент что был передан в функцию
+     * @author Алехнович Александр
      * @see WebDriverWait
      * @see org.openqa.selenium.support.ui.FluentWait
      * @see org.openqa.selenium.support.ui.Wait
@@ -144,8 +165,9 @@ public class BasePage {
 
     /**
      * Явное ожидание того что элемент станет видемым
-     * @author Алехнович Александр
+     *
      * @param element - веб элемент который мы ожидаем что будет  виден на странице
+     * @author Алехнович Александр
      */
     protected WebElement waitUtilElementToBeVisible(WebElement element) {
         return wait.until(ExpectedConditions.visibilityOf(element));
@@ -153,8 +175,9 @@ public class BasePage {
 
     /**
      * Функция позволяющая производить scroll до любого элемента с помощью Actions
-     * @author Алехнович Александр
+     *
      * @param element - веб элемент до которого нужно проскролить
+     * @author Алехнович Александр
      * @author Алехнович Александр
      */
     public WebElement scrollToElementActions(WebElement element) {
@@ -201,7 +224,7 @@ public class BasePage {
     /**
      * Проверяет отображение элемента на странице
      *
-     * @param element - веб элемент у которого нужно найти под-элемент
+     * @param element      - веб элемент у которого нужно найти под-элемент
      * @param underElement - xpath под-элемента который нужно проверить
      * @author Алехнович Александр
      */
@@ -218,31 +241,87 @@ public class BasePage {
     }
 
     /**
-     * Метод сохраняет товар добавленный в корзину в лист
+     * Метод сохраняет товар в лист добавленный в корзину
+     *
      * @author Алехнович Александр
      */
-    protected List<Product> saveListProducts(Product product){
-        listProductsAndPrice.add(product);
-        return listProductsAndPrice;
-    }
-
-    /**
-     * Метод удаляет товар из листа
-     * @author Алехнович Александр
-     */
-    protected List<Product> deleteProduct(Product product){
-        if (listProductsAndPrice.stream().anyMatch(s -> s.getName().equalsIgnoreCase(product.getName()))) {
-            listProductsAndPrice.removeIf(s -> s.getName().equalsIgnoreCase(product.getName()));
+    protected void saveListOriginalProducts(Product product) {
+        if (listOriginalProducts.stream().noneMatch(s -> s.getName().equalsIgnoreCase(product.getName()))) {
+            listOriginalProducts.add(product);
         }
-        return listProductsAndPrice;
     }
 
     /**
-     * Метод возвращает лист с товарами
+     * Метод удаляет товар из листа (корзины)
+     *
      * @author Алехнович Александр
      */
-    protected List<Product> getListProducts(){
-        return listProductsAndPrice;
+    protected void deleteOriginalProducts(Product product) {
+        if (listOriginalProducts.stream().anyMatch(s -> s.getName().equalsIgnoreCase(product.getName()))) {
+            listOriginalProducts.removeIf(s -> s.getName().equalsIgnoreCase(product.getName()));
+        }
     }
 
+    /**
+     * Метод возвращает лист с товарами добавленными в корзину
+     *
+     * @author Алехнович Александр
+     */
+    protected List<Product> getListOriginalProducts() {
+        return listOriginalProducts;
+    }
+
+    /**
+     * Метод сохраняет товар в лист добавленный в корзину
+     *
+     * @author Алехнович Александр
+     */
+    protected void saveListProductsAddInBasket(Product product) {
+        listProductsInBasket.add(product);
+    }
+
+    /**
+     * Метод удаляет товар из листа (корзины)
+     *
+     * @author Алехнович Александр
+     */
+    protected void deleteProductAddInBasket(Product product) {
+        if (listProductsInBasket.stream().anyMatch(s -> s.getName().equalsIgnoreCase(product.getName()))) {
+            listProductsInBasket.removeIf(s -> s.getName().equalsIgnoreCase(product.getName()));
+        }
+    }
+
+    /**
+     * Метод возвращает лист с товарами добавленными в корзину
+     *
+     * @author Алехнович Александр
+     */
+    protected List<Product> getListProductsAddInBasket() {
+        return listProductsInBasket;
+    }
+
+    /**
+     * @author Алехнович Александр
+     */
+    protected int getNumberResultSubstring(WebElement element) {
+        return Integer.parseInt(element.getText()
+                .substring(0, element.getText().indexOf("₽"))
+                .replaceAll(" ", ""));
+    }
+
+    /**
+     * @author Алехнович Александр
+     */
+    protected int getNumberResultReplace(WebElement element) {
+        return Integer.parseInt(element.getText().replaceAll("\\D", ""));
+    }
+
+    protected Product saveProduct(String productName, String warranty, int price, int priceWithWarranty){
+        Product product = new Product();
+        product.setName(productName);
+        product.setPriceGuarantee(priceWithWarranty);
+        product.setWarranty(warranty);
+        product.setPrice(price);
+        return product;
+    }
 }

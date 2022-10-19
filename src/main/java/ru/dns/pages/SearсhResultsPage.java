@@ -86,7 +86,7 @@ public class SearсhResultsPage extends BasePage {
                             waitUtilElementToBeClickable(listSearchProduct.findElement(buttonBuy));
                             scrollToElementActions(sumProductBasKet);
                             wait.until(ExpectedConditions.textToBePresentInElement(listSearchProduct.findElement(buttonBuy), goToBasket));
-                            saveProductInSearchPage(listSearchProduct, productName, warranty);
+                            saveProductInSearchPage(listSearchProduct, warranty);
                             return this;
                         } else {
                             Assertions.fail("Товара: " + productName + " нет в наличии");
@@ -112,7 +112,7 @@ public class SearсhResultsPage extends BasePage {
                         waitUtilElementToBeClickable(listSearchProduct.findElement(buttonBuy));
                         scrollToElementActions(sumProductBasKet);
                         wait.until(ExpectedConditions.textToBePresentInElement(listSearchProduct.findElement(buttonBuy), goToBasket));
-                        saveProductInSearchPage(listSearchProduct, productName, warranty);
+                        saveProductInSearchPage(listSearchProduct, warranty);
                         return this;
                     } else {
                         Assertions.fail("Товара: " + productName + " нет в наличии");
@@ -179,19 +179,13 @@ public class SearсhResultsPage extends BasePage {
     /**
      * Метод сохраняет добавленный товар в List, для использования в следующих шагах
      * @author Алехнович Александр
-     * @param webElement - веб-элемент товара, у которого берем цену для сохранения
-     * @param productName - название товара для сохранения
      * @param warranty - значение гарантии на товар для сохранения
      */
-    public void saveProductInSearchPage(WebElement webElement, String productName, String warranty) {
-        Product product = new Product();
-        product.setName(productName);
-        product.setWarranty(warranty);
-        waitUtilElementToBeVisible(webElement);
-        product.setPrice(Integer.parseInt(webElement.findElement(priceProduct).getText()
-                .substring(0, webElement.findElement(priceProduct).getText().indexOf("₽"))
-                .replaceAll(" ", "")));
-        pageManager.getBasePage().saveListProducts(product);
+    public void saveProductInSearchPage(WebElement webElement, String warranty) {
+        Product product = saveProduct(webElement.findElement(nameProductInCard).getText(),warranty,getNumberResultSubstring(webElement.findElement(priceProduct)),
+                new Product().getPriceGuarantee());
+        pageManager.getBasePage().saveListProductsAddInBasket(product);
+        pageManager.getBasePage().saveListOriginalProducts(product);
     }
     /**
      * Метод сохраняет цену корзины на странице результатов поиска
@@ -199,7 +193,7 @@ public class SearсhResultsPage extends BasePage {
      * @return int - цена в корзине
      */
     public int getResultPriceProductBasketInSearch() {
-        return Integer.parseInt(sumProductBasKet.getText().replaceAll("\\D", ""));
+        return getNumberResultReplace(sumProductBasKet);
     }
 
     /**
@@ -208,7 +202,7 @@ public class SearсhResultsPage extends BasePage {
      * @return SearсhResultsPage - т.е. остаемся на этой странице
      */
     public SearсhResultsPage checkPriceBasket() {
-        int sumPriceProducts = pageManager.getBasePage().getListProducts().stream().mapToInt(Product::getPrice).sum();
+        int sumPriceProducts = pageManager.getBasePage().getListProductsAddInBasket().stream().mapToInt(Product::getPrice).sum();
         Assertions.assertEquals(sumPriceProducts, getResultPriceProductBasketInSearch(), "Сумма в корзине не равна сумме покупок");
         return this;
     }

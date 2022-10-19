@@ -20,40 +20,40 @@ public class BasketPage extends BasePage {
      * Элемент "Корзина" на странице корзины
      */
     @FindBy(xpath = "//span[contains(@class,'cart-link__price')]")
-    WebElement sumProductBasKet;
+    private WebElement sumProductBasKet;
 
     /**
      * @author Алехнович Александр
      * Лист карточек продукта на странице корзины
      */
     @FindBy(xpath = "//div[@class='cart-items__content-container']")
-    List<WebElement> listProductsBasket;
+    private List<WebElement> listProductsBasket;
 
     /**
      * @author Алехнович Александр
      * Кнопка "Вернуть удалённый товар" на странице корзины
      */
     @FindBy(xpath = "//div[@class='cart-tab-total-amount']//span[@class='restore-last-removed']")
-    WebElement buttonReturnDeletedItem;
+    private WebElement buttonReturnDeletedItem;
 
     /**
      * @author Алехнович Александр
      * Кнопка "Перейти к оформлению" на странице корзины
      */
     @FindBy(xpath = "//button[contains(@id,'buy-btn-main')]")
-    WebElement goToCheckout;
+    private WebElement goToCheckout;
 
     /**
      * @author Алехнович Александр
      * Для проверки чекбокса с гарантией у товара на странице корзины
      */
-    By productGuaranteeCheckbox = By.xpath(".//div[contains(@class,'additional-warranties-row__radio')]");
+    private By productGuaranteeCheckbox = By.xpath(".//div[contains(@class,'additional-warranties-row__radio')]");
 
     /**
      * @author Алехнович Александр
      * Поиск названия товара в карточке товара на странице корзины
      */
-    By nameProductInBasket = By.xpath(".//a[contains(@class,'base-ui-link')]");
+    private By nameProductInBasket = By.xpath(".//a[contains(@class,'base-ui-link')]");
 
     /**
      * @author Алехнович Александр
@@ -71,7 +71,7 @@ public class BasketPage extends BasePage {
      * @author Алехнович Александр
      * Поиск цены у корзины
      */
-    By sumBasket = By.xpath("//span[contains(@class,'cart-link__price')]");
+    private By sumBasket = By.xpath("//span[contains(@class,'cart-link__price')]");
 
     /**
      * @author Алехнович Александр
@@ -94,11 +94,9 @@ public class BasketPage extends BasePage {
                 Assertions.assertTrue(checkBox.getAttribute("class").contains("checked"),
                         "Чекбокс: " + warrantyInBasket + " в корзине у продукта: " + nameProduct + " не выбран");
                 return this;
-            } else {
-                Assertions.fail("Товар в корзине: " + nameProduct + "не найден");
             }
         }
-        Assertions.fail("Чекбокс с гарантией: " + warrantyInBasket + " в корзине у продукта: " + nameProduct + "не найден");
+        Assertions.fail("Товар в корзине: " + nameProduct + "не найден");
         return this;
     }
 
@@ -108,7 +106,7 @@ public class BasketPage extends BasePage {
      * @return int - цена в корзине
      */
     public int getResultPriceProductBasket() {
-        return Integer.parseInt(sumProductBasKet.getText().replaceAll("\\D", ""));
+        return getNumberResultReplace(sumProductBasKet);
     }
 
     /**
@@ -117,16 +115,19 @@ public class BasketPage extends BasePage {
      * @return BasketPage - т.е. остаемся на этой странице
      */
     public BasketPage checkProductPrice() {
+        pageManager.getBasePage().getListOriginalProducts().forEach(x-> System.out.println(x));
+        System.out.println("___________________________________________________");
+        pageManager.getBasePage().getListProductsAddInBasket().forEach(x-> System.out.println(x));
         for (int i = 0; i < listProductsBasket.size(); i++) {
             String text = listProductsBasket.get(i).findElement(nameProductInBasket).getText();
-            if (pageManager.getBasePage().getListProducts().stream().anyMatch(x -> x.getName().contains(text))) {
-                int priceProductResult = pageManager.getBasePage().getListProducts().stream().filter(x -> x.getName().contains(text))
+            if (pageManager.getBasePage().getListProductsAddInBasket().stream().anyMatch(x -> x.getName().contains(text))) {
+                int priceProductResult = pageManager.getBasePage().getListProductsAddInBasket().stream().filter(x -> x.getName().contains(text))
                         .findFirst().get().getPrice();
-                int priceWarrantyResult = pageManager.getBasePage().getListProducts().stream().filter(x -> x.getName().contains(text))
-                        .findFirst().get().getPriceWithWarranty();
-                Assertions.assertEquals(priceProductResult - priceWarrantyResult, Integer.parseInt(listProductsBasket.get(i)
-                                .findElement(priceProduct).getText().replaceAll("\\D", "")),
-                        "Цена товара в корзине: " + text + "не совпадает");
+                int priceWarrantyResult = pageManager.getBasePage().getListProductsAddInBasket().stream().filter(x -> x.getName().contains(text))
+                        .findFirst().get().getPriceGuarantee();
+                Assertions.assertEquals(priceProductResult - priceWarrantyResult, getNumberResultReplace(listProductsBasket.get(i)
+                                .findElement(priceProduct)),
+                        "Цена товара в корзине: " + text + " не совпадает");
             }
         }
         return this;
@@ -139,7 +140,7 @@ public class BasketPage extends BasePage {
      * @author Алехнович Александр
      */
     public BasketPage checkSumBasket() {
-        int sumPriceProduct = pageManager.getBasePage().getListProducts().stream().mapToInt(Product::getPrice).sum();
+        int sumPriceProduct = pageManager.getBasePage().getListProductsAddInBasket().stream().mapToInt(Product::getPrice).sum();
         Assertions.assertEquals(sumPriceProduct, getResultPriceProductBasket(), "Сумма покупок не равна сумме корзины");
         return this;
     }
@@ -171,8 +172,13 @@ public class BasketPage extends BasePage {
     public BasketPage checkDeleteProduct(String productName) {
         Assertions.assertFalse(listProductsBasket.stream().anyMatch(x -> x.findElement(nameProductInBasket)
                 .getText().equalsIgnoreCase(productName)), "Товар: " + productName + " не удален из корзины");
-        Product productResult = pageManager.getBasePage().getListProducts().stream().filter(x -> x.getName().equalsIgnoreCase(productName)).findFirst().get();
-        pageManager.getBasePage().deleteProduct(productResult);
+        Product productResult = pageManager.getBasePage()
+                .getListProductsAddInBasket()
+                .stream()
+                .filter(x -> x.getName().contains(productName))
+                .findFirst()
+                .get();
+        pageManager.getBasePage().deleteProductAddInBasket(productResult);
         return this;
     }
 
@@ -195,10 +201,10 @@ public class BasketPage extends BasePage {
                     waitUtilElementToBeVisible(webElement.findElement(plusProduct));
                     waitUtilElementToBeClickable(goToCheckout);
                     wait.until(ExpectedConditions.invisibilityOfElementWithText(sumBasket, text));
-                    Product productResult = pageManager.getBasePage().getListProducts().stream()
+                    Product productResult = pageManager.getBasePage().getListProductsAddInBasket().stream()
                             .filter(x -> x.getName().equalsIgnoreCase(nameProduct)).findFirst().get();
-                    pageManager.getBasePage().saveListProducts(productResult);
-                    int sumPriceProduct = pageManager.getBasePage().getListProducts().stream().mapToInt(Product::getPrice).sum();
+                    pageManager.getBasePage().saveListProductsAddInBasket(productResult);
+                    int sumPriceProduct = pageManager.getBasePage().getListProductsAddInBasket().stream().mapToInt(Product::getPrice).sum();
                     Assertions.assertEquals(sumPriceProduct, getResultPriceProductBasket(),
                             "Количество товара в корзине: " + nameProduct + " не увеличилось");
                     count++;
@@ -239,7 +245,7 @@ public class BasketPage extends BasePage {
             product.setPrice(Integer.parseInt(listProductsBasket.stream().filter(x -> x.findElement(nameProductInBasket)
                             .getText().contains(productName)).findFirst().get().findElement(priceProduct)
                     .getText().replaceAll("\\D", "")));
-            pageManager.getBasePage().saveListProducts(product);
+            pageManager.getBasePage().saveListProductsAddInBasket(product);
         }
         return this;
     }
